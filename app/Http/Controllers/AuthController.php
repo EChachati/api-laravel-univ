@@ -114,9 +114,58 @@ class AuthController extends Controller
         ], 201);
     }
 
-    public function update(Request $request){
+    public function update(Request $request, $id=null){
+
         $id_user = json_decode((auth()->user()), true)['id'];
-        $user = User::find($id_user)->update($request->all());
-        return \response(User::find($id_user));
+        $admin = json_decode((auth()->user()), true)['is_admin'];
+
+        if($id==null){
+
+            // if /update without id
+            $user = User::find($id_user)->update($request->all());
+            return \response(['message' => 'User updated successfully','id' => $id, 'user' => $user], 200);
+
+        } elseif($id_user == $id or $admin == 1){
+
+            // if /update/{id} with id
+            $user = User::find($id);
+            if ($user) {
+                $user->update($request->all());
+                return \response(['message' => 'User updated successfully','id' => $id, 'user' => $user], 200);
+            } else {
+                return \response(['message' => 'User not found'], 404);
+            }
+            return \response(User::find($id), 200);
+
+        }
+        return response()->json(['message' => 'Don\'t have permission to update this user'], 401);
+    }
+
+    public function destroy($id=null){
+
+        $admin = json_decode((auth()->user()), true)['is_admin'];
+        $user_id = json_decode((auth()->user()), true)['id'];
+
+        if($id == null){
+
+            // if /destroy without id
+            $user = User::find($user_id)->delete();
+            return response()->json(['message' => 'User deleted successfully'], 200);
+
+        } elseif($admin == 1 or $id_user == $id){
+
+            // if /destroy/{id} with id
+            $user = User::find($id);
+            if($user){ // If user exists
+                $user->delete();
+                return response()->json(['message' => 'User deleted successfully','id' => $id, 'user' => $user], 200);
+            } else { // If user doesn't exists
+                return response()->json(['message' => 'User not found'], 404);
+            }
+
+        } else {
+            return \response('Destroy not allowed. Not an admin an not your account', 403);
+        }
+
     }
 }

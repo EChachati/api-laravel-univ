@@ -29,7 +29,9 @@ class User extends Authenticatable implements JWTSubject
         'address',
         'state',
         'city',
-        'image'
+        'image',
+        'is_admin',
+        'is_active',
     ];
 
     /**
@@ -62,5 +64,9 @@ class User extends Authenticatable implements JWTSubject
      */
     public function getJWTCustomClaims() {
         return [];
+    }
+
+    public function program() {
+        return $this->hasMany('Program::class');
     }
 }

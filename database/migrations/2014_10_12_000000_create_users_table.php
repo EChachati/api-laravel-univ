@@ -28,6 +28,8 @@ class CreateUsersTable extends Migration
             $table->string('state');
             $table->string('city');
             $table->binary('image')->nullable();
+            $table->boolean('is_admin')->default(false);
+            $table->boolean('is_active')->default(true);
         });
     }
 
