@@ -122,8 +122,9 @@ class AuthController extends Controller
         if($id==null){
 
             // if /update without id
-            $user = User::find($id_user)->update($request->all());
-            return \response(['message' => 'User updated successfully','id' => $id, 'user' => $user], 200);
+            $user = auth()->user();
+            $user->update($request->all());
+            return \response()->json(['message' => 'User updated successfully','id' => $user->id, 'user' => $user], 200);
 
         } elseif($id_user == $id or $admin == 1){
 
