@@ -10,7 +10,7 @@
     "env": {
         "APP_ENV": "production",
         "APP_DEBUG": "true",
-        "APP_URL": "https://api-laravel-univ.000webhostapp.com",
+        "APP_URL": "https://api-laravel-univ.vercel.app/",
 
         "DB_CONNECTION": "sqlite",
         "DB_DATABASE": "database/database.sqlite",
