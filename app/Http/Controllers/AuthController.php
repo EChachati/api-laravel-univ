@@ -100,7 +100,7 @@ class AuthController extends Controller
             'image' => 'image'
         ]);
         if($validator->fails()){
-            return response()->json($validator->errors()->toJson(),400);
+            return response()->json(["response" => $validator->errors()->toJson(), "request" => $request->all()],400);
         }
 
         $user = User::create(array_merge(
@@ -116,8 +116,8 @@ class AuthController extends Controller
 
     public function update(Request $request, $id=null){
 
-        $id_user = json_decode((auth()->user()), true)['id'];
-        $admin = json_decode((auth()->user()), true)['is_admin'];
+        $id_user = auth()->user()->id;
+        $admin = auth()->user()->is_admin;
 
         if($id==null){
 
