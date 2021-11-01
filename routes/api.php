@@ -31,6 +31,7 @@ Route::group([
     Route::post('update/{id}', 'App\Http\Controllers\AuthController@update');
     Route::delete('destroy/{id}', 'App\Http\Controllers\AuthController@destroy');
     Route::delete('destroy', 'App\Http\Controllers\AuthController@destroy');
+    Route::get('list', 'App\Http\Controllers\AuthController@list');
 });
 
 Route::group([
