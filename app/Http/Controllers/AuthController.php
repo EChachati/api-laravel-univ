@@ -171,14 +171,9 @@ class AuthController extends Controller
     }
 
     public function list(){
-        $user = auth()->user();
 
-        if ($user->is_admin == 1) {
-            $users = User::all();
-            return response()->json(['users' => $users], 200);
-        } else {
-            return response()->json(['message' => 'Don\'t have permission to list users'], 401);
-        }
-        return response()->json(['message' => 'paso algo inesperado y me lleva la verga'], 400);
+        $users = User::all();
+        return response()->json(['users' => $users], 200);
+
     }
 }

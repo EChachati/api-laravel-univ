@@ -35,6 +35,14 @@ class ProgramController extends Controller
     {
 
         $user = auth()->user();
+        if (! $user) {
+            return response()->json(
+                [
+                    'error' => 'Not user detected',
+                    'request' => $request->all(),
+                    'user' => $user
+                ], 401);
+        }
         $id_user = $user->id;
 
         $validator = Validator::make($request->all(), [
@@ -64,6 +72,7 @@ class ProgramController extends Controller
 
 
        $tags = ($request['tags']);
+       $tags = explode(',', $tags);
 
         foreach ($tags as $tag_name) {
             $tag =  Tag::firstOrCreate(['name' => $tag_name]);
