@@ -103,10 +103,17 @@ class AuthController extends Controller
             return response()->json(["response" => $validator->errors()->toJson(), "request" => $request->all()],400);
         }
 
+
         $user = User::create(array_merge(
             $validator->validate(),
             ['password' => bcrypt($request->password)]
         ));
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $user->image = base64_encode(file_get_contents($image));
+            $user->save();
+        }
 
         return response()->json([
             'message' => '¡Usuario registrado exitosamente!',
@@ -124,6 +131,13 @@ class AuthController extends Controller
             // if /update without id
             $user = auth()->user();
             $user->update($request->all());
+
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $user->image = base64_encode(file_get_contents($image));
+                $user->save();
+            }
+
             return \response()->json(['message' => 'User updated successfully','id' => $user->id, 'user' => $user, "request" => $request->all()], 200);
 
         } elseif($id_user == $id or $admin == 1){
@@ -132,6 +146,13 @@ class AuthController extends Controller
             $user = User::find($id);
             if ($user) {
                 $user->update($request->all());
+
+                if ($request->hasFile('image')) {
+                    $image = $request->file('image');
+                    $user->image = base64_encode(file_get_contents($image));
+                    $user->save();
+                }
+
                 return \response(['message' => 'User updated successfully','id' => $id, 'user' => $user, "request" => $request->all()], 200);
             } else {
                 return \response(['message' => 'User not found', "request" => $request->all()], 404);

@@ -34,6 +34,11 @@ class ProgramController extends Controller
     public function create(Request $request)
     {
 
+        //return response()->json($request->file('image_1')->getClientMimeType(), 200);
+        //return response()->json($request->hasFile('image_1'), 200);
+        //return response()->json(get_class_methods($request->file('image_1')), 200);
+
+
         $user = auth()->user();
         if (! $user) {
             return response()->json(
@@ -63,12 +68,32 @@ class ProgramController extends Controller
                 400
             );
         }
+
+
+
+
         $program = Program::create(
             array_merge(
                 $validator->validate(),
                 ['user_id' => $id_user]
             )
         );
+
+
+        if ($request->hasFile('image_1')) {
+            $image_1 = $request->file('image_1');
+            $program->image_1 = base64_encode(file_get_contents($image_1)); //$image_1->hashName();
+        }
+
+        if ($request->hasFile('image_2')) {
+            $image_2 = $request->file('image_2');
+            $program->image_2 = base64_encode(file_get_contents($image_2));
+        }
+
+        if ($request->hasFile('image_3')) {
+            $image_3 = $request->file('image_3');
+            $program->image_3 = base64_encode(file_get_contents($image_3));
+        }
 
 
        $tags = ($request['tags']);
@@ -113,7 +138,24 @@ class ProgramController extends Controller
                 $program->tags()->attach($tag);
             }
 
+            if ($request->hasFile('image_1')) {
+                $image_1 = $request->file('image_1');
+                $program->image_1 = base64_encode(file_get_contents($image_1)); //$image_1->hashName();
+            }
+
+            if ($request->hasFile('image_2')) {
+                $image_2 = $request->file('image_2');
+                $program->image_2 = base64_encode(file_get_contents($image_2));
+            }
+
+            if ($request->hasFile('image_3')) {
+                $image_3 = $request->file('image_3');
+                $program->image_3 = base64_encode(file_get_contents($image_3));
+            }
+
+
             $program->save();
+
             return response()->json(Program::with('tags')->find($id), 200);
         } else {
             return \response()->json(
