@@ -97,7 +97,7 @@ class AuthController extends Controller
             'address' => 'required|max:280',
             'state' => 'required|alpha|max:32',
             'city' => 'required|alpha|max:32',
-            'image' => 'image'
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg'
         ]);
         if($validator->fails()){
             return response()->json(["response" => $validator->errors()->toJson(), "request" => $request->all()],400);
