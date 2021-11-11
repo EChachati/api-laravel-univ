@@ -138,7 +138,7 @@ class AuthController extends Controller
                 $user->save();
             }
 
-            return \response()->json(['message' => 'User updated successfully','id' => $user->id, 'user' => $user, "request" => $request->all()], 200);
+            return \response()->json(['message' => 'User updated successfully','id' => $user->id, 'user' => auth()->user(), "request" => $request->all()], 200);
 
         } elseif($id_user == $id or $admin == 1){
 
