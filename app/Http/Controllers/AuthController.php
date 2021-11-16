@@ -95,8 +95,8 @@ class AuthController extends Controller
             'identification_card' => 'required|alpha_dash',
             'born' => 'required|date|date_format:d/m/Y',
             'address' => 'required|max:280',
-            'state' => 'required|alpha|max:32',
-            'city' => 'required|alpha|max:32',
+            'state' => 'required|max:32',
+            'city' => 'required|max:32',
             'image' => 'image|mimes:jpeg,png,jpg,gif,svg'
         ]);
         if($validator->fails()){
