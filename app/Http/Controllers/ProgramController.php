@@ -18,6 +18,7 @@ class ProgramController extends Controller
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
     public function list()
     {
+        /*
         $user = auth()->user();
         $id_user = $user->id;
         $is_admin = $user->is_admin;
@@ -28,6 +29,8 @@ class ProgramController extends Controller
         } else {
             $list = Program::with('tags')->where('user_id', $id_user)->get();
         }
+        */
+        $list = Program::with('tags')->get();
         return response()->json($list, 200);
     }
 
