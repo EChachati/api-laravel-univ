@@ -56,7 +56,34 @@ class ProgramTest:
         headers = {}
         return requests.request("GET", url, headers=headers)
 
+class MessageTest:
+    def create():
+        url = "http://localhost:8000/api/message/create"
+
+        payload={
+            'email': 'chachati28@gmail.com',
+            'name': 'Edkar',
+            'text': 'Hola Cara de bola'
+            }
+
+        headers = {}
+        return requests.request("POST", url, headers=headers, data=payload)
+
+    def list():
+        url = "http://localhost:8000/api/message/list"
+
+        headers = {}
+        return requests.request("GET", url, headers=headers)
+
+    def detail():
+        url = "http://localhost:8000/api/message/detail/1"
+
+        headers = {}
+        return requests.request("GET", url, headers=headers)
+
 
 
 if __name__ == '__main__':
-    print(ProgramTest.list().text)
+    print(MessageTest.list().text)
+    print(MessageTest.detail().text)
+    #print(ProgramTest.list().text)

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Models\Message;
+use Illuminate\Support\Facades\Validator;
+
 
 class MessageController extends Controller
 {
