@@ -18,7 +18,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register', 'list']]);
     }
 
     /**
@@ -31,7 +31,7 @@ class AuthController extends Controller
         $credentials = request(['email', 'password']);
 
         if (! $token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return response()->json(['error' => 'Unauthorized', "request" => $credentials->all()], 401);
         }
 
         return $this->respondWithToken($token);
@@ -95,18 +95,25 @@ class AuthController extends Controller
             'identification_card' => 'required|alpha_dash',
             'born' => 'required|date|date_format:d/m/Y',
             'address' => 'required|max:280',
-            'state' => 'required|alpha|max:32',
-            'city' => 'required|alpha|max:32',
-            'image' => 'image'
+            'state' => 'required|max:32',
+            'city' => 'required|max:32',
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg'
         ]);
         if($validator->fails()){
-            return response()->json($validator->errors()->toJson(),400);
+            return response()->json(["response" => $validator->errors()->toJson(), "request" => $request->all()],400);
         }
+
 
         $user = User::create(array_merge(
             $validator->validate(),
             ['password' => bcrypt($request->password)]
         ));
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $user->image = base64_encode(file_get_contents($image));
+            $user->save();
+        }
 
         return response()->json([
             'message' => '¡Usuario registrado exitosamente!',
@@ -116,15 +123,22 @@ class AuthController extends Controller
 
     public function update(Request $request, $id=null){
 
-        $id_user = json_decode((auth()->user()), true)['id'];
-        $admin = json_decode((auth()->user()), true)['is_admin'];
+        $id_user = auth()->user()->id;
+        $admin = auth()->user()->is_admin;
 
         if($id==null){
 
             // if /update without id
             $user = auth()->user();
             $user->update($request->all());
-            return \response()->json(['message' => 'User updated successfully','id' => $user->id, 'user' => $user], 200);
+
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $user->image = base64_encode(file_get_contents($image));
+                $user->save();
+            }
+
+            return \response()->json(['message' => 'User updated successfully','id' => $user->id, 'user' => auth()->user(), "request" => $request->all()], 200);
 
         } elseif($id_user == $id or $admin == 1){
 
@@ -132,14 +146,21 @@ class AuthController extends Controller
             $user = User::find($id);
             if ($user) {
                 $user->update($request->all());
-                return \response(['message' => 'User updated successfully','id' => $id, 'user' => $user], 200);
+
+                if ($request->hasFile('image')) {
+                    $image = $request->file('image');
+                    $user->image = base64_encode(file_get_contents($image));
+                    $user->save();
+                }
+
+                return \response(['message' => 'User updated successfully','id' => $id, 'user' => $user, "request" => $request->all()], 200);
             } else {
-                return \response(['message' => 'User not found'], 404);
+                return \response(['message' => 'User not found', "request" => $request->all()], 404);
             }
             return \response(User::find($id), 200);
 
         }
-        return response()->json(['message' => 'Don\'t have permission to update this user'], 401);
+        return response()->json(['message' => 'Don\'t have permission to update this user', "request" => $request->all()], 401);
     }
 
     public function destroy($id=null){
@@ -167,6 +188,13 @@ class AuthController extends Controller
         } else {
             return \response('Destroy not allowed. Not an admin an not your account', 403);
         }
+
+    }
+
+    public function list(){
+
+        $users = User::all();
+        return response()->json(['users' => $users], 200);
 
     }
 }

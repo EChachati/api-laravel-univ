@@ -18,26 +18,40 @@ class ProgramController extends Controller
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
     public function list()
     {
-        $id_user = json_decode((auth()->user()), true)['id'];
-        $user = User::find($id_user);
-        $is_admin = json_decode($user, true)['is_admin'];
-        $is_active = json_decode($user, true)['is_active'];
-
-
+        /*
+        $user = auth()->user();
+        $id_user = $user->id;
+        $is_admin = $user->is_admin;
+        $is_active = $user->is_active;
 
         if ($is_admin == '1') {
-            $list = Program::with('tags')->all();
+            $list = Program::with('tags')->get();
         } else {
-                $list = Program::with('tags')->where('user_id', $id_user)->get();
+            $list = Program::with('tags')->where('user_id', $id_user)->get();
         }
+        */
+        $list = Program::with('tags')->get();
         return response()->json($list, 200);
     }
 
     public function create(Request $request)
     {
 
-        $id_user = json_decode((auth()->user()), true)['id'];
-        $user = User::find($id_user);
+        //return response()->json($request->file('image_1')->getClientMimeType(), 200);
+        //return response()->json($request->hasFile('image_1'), 200);
+        //return response()->json(get_class_methods($request->file('image_1')), 200);
+
+
+        $user = auth()->user();
+        if (! $user) {
+            return response()->json(
+                [
+                    'error' => 'Not user detected',
+                    'request' => $request->all(),
+                    'user' => $user
+                ], 401);
+        }
+        $id_user = $user->id;
 
         $validator = Validator::make($request->all(), [
             'title' => 'required',
@@ -48,8 +62,19 @@ class ProgramController extends Controller
 
         ]);
         if($validator->fails()){
-            return response()->json($validator->errors()->toJson(),400);
+            return response()->json(
+                [
+                    $validator->errors()->toJson(),
+                    "request" => $request->all(),
+                    "user" => $user
+                ],
+                400
+            );
         }
+
+
+
+
         $program = Program::create(
             array_merge(
                 $validator->validate(),
@@ -58,7 +83,24 @@ class ProgramController extends Controller
         );
 
 
+        if ($request->hasFile('image_1')) {
+            $image_1 = $request->file('image_1');
+            $program->image_1 = base64_encode(file_get_contents($image_1)); //$image_1->hashName();
+        }
+
+        if ($request->hasFile('image_2')) {
+            $image_2 = $request->file('image_2');
+            $program->image_2 = base64_encode(file_get_contents($image_2));
+        }
+
+        if ($request->hasFile('image_3')) {
+            $image_3 = $request->file('image_3');
+            $program->image_3 = base64_encode(file_get_contents($image_3));
+        }
+
+
        $tags = ($request['tags']);
+       $tags = explode(',', $tags);
 
         foreach ($tags as $tag_name) {
             $tag =  Tag::firstOrCreate(['name' => $tag_name]);
@@ -67,12 +109,20 @@ class ProgramController extends Controller
         $program->user()->associate($user);
         $program->save();
 
-        return response()->json(Program::with('tags')->find($program->id), 201);
+        return response()->json(
+            [
+                "result" => Program::with('tags')->find($program->id),
+                "request" => $request->all(),
+                "user" => $user
+            ],
+            201
+            );
 
     }
 
     public function update(Request $request, $id){
         $user = auth()->user();
+
         if ($user->is_admin == '1'){
             $programs = Program::all()->pluck('id');
         } else {
@@ -81,8 +131,6 @@ class ProgramController extends Controller
 
         if ($programs->contains($id)){
             $program = Program::with('tags')->find($id);
-            //return response()->json($program, 200);
-
             $program->update($request->all());
 
             $tags = ($request['tags']);
@@ -93,10 +141,32 @@ class ProgramController extends Controller
                 $program->tags()->attach($tag);
             }
 
+            if ($request->hasFile('image_1')) {
+                $image_1 = $request->file('image_1');
+                $program->image_1 = base64_encode(file_get_contents($image_1)); //$image_1->hashName();
+            }
+
+            if ($request->hasFile('image_2')) {
+                $image_2 = $request->file('image_2');
+                $program->image_2 = base64_encode(file_get_contents($image_2));
+            }
+
+            if ($request->hasFile('image_3')) {
+                $image_3 = $request->file('image_3');
+                $program->image_3 = base64_encode(file_get_contents($image_3));
+            }
+
+
             $program->save();
+
             return response()->json(Program::with('tags')->find($id), 200);
         } else {
-            return \response()->json(['message' => 'Program not found Or not allowed to update'], 403);
+            return \response()->json(
+                [
+                    'message' => 'Program not found Or not allowed to update',
+                    "request" => $request->all(),
+                    "user" => $user
+                ], 403);
         }
 
     }
@@ -111,9 +181,17 @@ class ProgramController extends Controller
         if($programs->contains($id)){
             $program = Program::find($id);
             $program->delete();
-            return response()->json(['message' => 'Program deleted successfully'], 200);
+            return response()->json(
+                [
+                    'message' => 'Program deleted successfully',
+                    "user" => $user
+                ], 200);
         } else {
-            return \response()->json(['message' => 'Program not found Or not allowed to delete'], 403);
+            return \response()->json(
+                [
+                    'message' => 'Program not found Or not allowed to delete',
+                    "user" => $user
+                ], 403);
         }
 
     }
@@ -129,7 +207,11 @@ class ProgramController extends Controller
         if($programs->contains($id)){
             return response()->json(Program::with('tags')->find($id), 200);
         } else {
-            return \response()->json(['message' => 'Program not found Or not allowed to see'], 403);
+            return \response()->json(
+                [
+                    'message' => 'Program not found Or not allowed to see',
+                    "user" => $user
+                ], 403);
         }
 
     }

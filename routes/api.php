@@ -31,6 +31,7 @@ Route::group([
     Route::post('update/{id}', 'App\Http\Controllers\AuthController@update');
     Route::delete('destroy/{id}', 'App\Http\Controllers\AuthController@destroy');
     Route::delete('destroy', 'App\Http\Controllers\AuthController@destroy');
+    Route::get('list', 'App\Http\Controllers\AuthController@list');
 });
 
 Route::group([
@@ -49,4 +50,15 @@ Route::group([
     'prefix' => 'tag'
 ], function ($router) {
     Route::get('list/{name}', 'App\Http\Controllers\TagController@list');
+});
+
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'message'
+], function ($router) {
+    Route::get('list', 'App\Http\Controllers\MessageController@list');
+    Route::get('detail/{id}', 'App\Http\Controllers\MessageController@detail');
+    Route::post('create', 'App\Http\Controllers\MessageController@create');
+    Route::post('update/{id}', 'App\Http\Controllers\MessageController@update');
+    Route::delete('destroy/{id}', 'App\Http\Controllers\MessageController@destroy');
 });
