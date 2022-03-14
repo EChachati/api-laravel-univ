@@ -16,6 +16,9 @@ class Program extends Model
         'image_1',
         'image_2',
         'image_3',
+        'url',
+        'is_active',
+        'subtype'
     ];
 
     public function user()
