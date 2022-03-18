@@ -43,13 +43,15 @@ class ProgramController extends Controller
 
 
         $user = auth()->user();
-        if (! $user) {
+        if (!$user) {
             return response()->json(
                 [
                     'error' => 'Not user detected',
                     'request' => $request->all(),
                     'user' => $user
-                ], 401);
+                ],
+                401
+            );
         }
         $id_user = $user->id;
 
@@ -57,11 +59,11 @@ class ProgramController extends Controller
             'title' => 'required',
             'type' => 'required',
             'image_1' => 'image',
-            'image_2'=> 'image',
+            'image_2' => 'image',
             'image_3' => 'image',
 
         ]);
-        if($validator->fails()){
+        if ($validator->fails()) {
             return response()->json(
                 [
                     $validator->errors()->toJson(),
@@ -99,13 +101,24 @@ class ProgramController extends Controller
         }
 
 
-       $tags = ($request['tags']);
-       $tags = explode(',', $tags);
+        $tags = ($request['tags']);
+        $tags = explode(',', $tags);
 
         foreach ($tags as $tag_name) {
             $tag =  Tag::firstOrCreate(['name' => $tag_name]);
             $program->tags()->attach($tag);
         }
+
+        $url = $request['url'];
+        if ($url) {
+            $program->url = $url;
+        }
+
+        $subtype = $request['subtype'];
+        if ($subtype) {
+            $program->subtype = $subtype;
+        }
+
         $program->user()->associate($user);
         $program->save();
 
@@ -116,20 +129,20 @@ class ProgramController extends Controller
                 "user" => $user
             ],
             201
-            );
-
+        );
     }
 
-    public function update(Request $request, $id){
+    public function update(Request $request, $id)
+    {
         $user = auth()->user();
 
-        if ($user->is_admin == '1'){
+        if ($user->is_admin == '1') {
             $programs = Program::all()->pluck('id');
         } else {
             $programs = Program::where('user_id', $user->id)->pluck('id');
         }
 
-        if ($programs->contains($id)){
+        if ($programs->contains($id)) {
             $program = Program::with('tags')->find($id);
             $program->update($request->all());
 
@@ -166,53 +179,60 @@ class ProgramController extends Controller
                     'message' => 'Program not found Or not allowed to update',
                     "request" => $request->all(),
                     "user" => $user
-                ], 403);
+                ],
+                403
+            );
         }
-
     }
 
-    public function destroy($id){
+    public function destroy($id)
+    {
         $user = auth()->user();
-        if ($user->is_admin == '1'){
+        if ($user->is_admin == '1') {
             $programs = Program::all()->pluck('id');
         } else {
             $programs = Program::where('user_id', $user->id)->pluck('id');
         }
-        if($programs->contains($id)){
+        if ($programs->contains($id)) {
             $program = Program::find($id);
             $program->delete();
             return response()->json(
                 [
                     'message' => 'Program deleted successfully',
                     "user" => $user
-                ], 200);
+                ],
+                200
+            );
         } else {
             return \response()->json(
                 [
                     'message' => 'Program not found Or not allowed to delete',
                     "user" => $user
-                ], 403);
+                ],
+                403
+            );
         }
-
     }
 
-    public function detail($id) {
+    public function detail($id)
+    {
         $user = auth()->user();
-        if ($user->is_admin == '1'){
+        if ($user->is_admin == '1') {
             $programs = Program::all()->pluck('id');
         } else {
             $programs = Program::where('user_id', $user->id)->pluck('id');
         }
 
-        if($programs->contains($id)){
+        if ($programs->contains($id)) {
             return response()->json(Program::with('tags')->find($id), 200);
         } else {
             return \response()->json(
                 [
                     'message' => 'Program not found Or not allowed to see',
                     "user" => $user
-                ], 403);
+                ],
+                403
+            );
         }
-
     }
 }
